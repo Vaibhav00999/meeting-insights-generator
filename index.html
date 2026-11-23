@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meeting Insights Generator — From Words to Worlds</title>
+<meta name="description" content="Turn spoken meetings into a summary, action items, decisions and a visual timeline — in your browser, with no API key and no upload to a server.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="logo">◉</span> Meeting Insights <span class="tag">StackUp Nov 2026</span></div>
+  <div class="top-actions">
+    <button id="demoBtn" class="btn primary">▶ Try demo meeting (1 click)</button>
+    <button id="exportMdBtn" class="btn">Export .md</button>
+    <button id="exportTxtBtn" class="btn">Export .txt</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>From words to worlds.<br><span>Your meeting, understood in 30 seconds.</span></h1>
+    <p>Record it, upload it, or paste it. Get a summary, owners, deadlines, decisions — and a visual timeline you can share. No account, no API key, no audio leaves your device.</p>
+    <div class="chips">
+      <span class="chip">🎙️ Speech → Text</span>
+      <span class="chip">🧠 Local summarisation</span>
+      <span class="chip">📊 Timeline + charts</span>
+      <span class="chip">⚡ 100% client-side</span>
+    </div>
+    <div id="browserNote" class="note" hidden>Live recording uses the Web Speech API — best in Chrome / Edge on desktop. Demo, paste and file upload work in any browser.</div>
+  </section>
+
+  <section class="grid">
+    <!-- INPUT -->
+    <div class="card">
+      <h2>1 · Get the words in</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="record">Record</button>
+        <button class="tab" data-tab="upload">Upload</button>
+        <button class="tab" data-tab="paste">Paste / Type</button>
+      </div>
+
+      <div id="tab-record" class="tabpane">
+        <p class="muted">Speak, and the transcript appears live. Pick a speaker name first — tap it again when the speaker changes.</p>
+        <div class="speaker-row" id="speakerRow"></div>
+        <div class="row">
+          <button id="recBtn" class="btn primary big">● Start recording</button>
+          <button id="stopRecBtn" class="btn" disabled>Stop</button>
+          <span id="recStatus" class="status">Not recording</span>
+        </div>
+        <p class="muted small">Interim results are shown in <em>italics</em>. Final lines are added to the transcript below. If your browser has no SpeechRecognition, use Demo / Paste instead.</p>
+      </div>
+
+      <div id="tab-upload" class="tabpane" hidden>
+        <label class="drop" id="dropZone">
+          <strong>Drop a file here, or click to choose</strong>
+          <span class="muted">Audio: .mp3 / .wav / .m4a / .webm — plays back in-page, transcribe it live while it plays.<br>
+          Transcript: .txt / .vtt / .srt / .md — parsed instantly, no audio needed.</span>
+          <input type="file" id="fileInput" accept=".mp3,.wav,.m4a,.webm,.ogg,.txt,.vtt,.srt,.md" hidden>
+        </label>
+        <audio id="audioPlayer" controls hidden style="width:100%;margin-top:10px"></audio>
+        <p id="fileInfo" class="muted small"></p>
+      </div>
+
+      <div id="tab-paste" class="tabpane" hidden>
+        <p class="muted">One line per turn. Format: <code>Speaker: words…</code> or <code>[00:12] Speaker: words…</code></p>
+        <textarea id="pasteBox" rows="7" placeholder="Priya: Let's decide the launch date today.
+Arjun: I think 5 December works if the checkout fix ships by 28 November."></textarea>
+        <div class="row"><button id="pasteBtn" class="btn primary">Use this transcript</button>
+        <button id="clearBtn" class="btn">Clear all</button></div>
+      </div>
+
+      <h3>Transcript <span id="wordCount" class="muted small"></span></h3>
+      <div id="transcript" class="transcript" aria-live="polite"><p class="muted">No transcript yet — press “Try demo meeting”, record, upload, or paste.</p></div>
+      <div class="row">
+        <button id="analyseBtn" class="btn primary big">✦ Generate insights</button>
+        <button id="sampleBtn" class="btn">Load demo</button>
+      </div>
+      <p id="analyseMsg" class="muted small"></p>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="card">
+      <h2>2 · See the meeting</h2>
+      <div id="emptyState" class="empty">
+        <div class="empty-icon">✦</div>
+        <p><strong>Nothing analysed yet.</strong><br>Load the demo and press “Generate insights” — the summary, actions, decisions and charts appear here in under a second.</p>
+      </div>
+      <div id="results" hidden>
+        <div class="stats" id="stats"></div>
+        <h3>Summary</h3>
+        <p id="summary" class="summary"></p>
+        <h3>Action items <span id="actionCount" class="muted small"></span></h3>
+        <ul id="actions" class="actions"></ul>
+        <h3>Key decisions</h3>
+        <ul id="decisions" class="decisions"></ul>
+        <h3>Who spoke</h3>
+        <div id="speakers" class="speakers"></div>
+        <h3>Timeline</h3>
+        <ol id="timeline" class="timeline"></ol>
+        <h3>Keywords</h3>
+        <div id="keywords" class="keywords"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card how">
+    <h2>How it works — 3 modalities, 0 servers</h2>
+    <ol class="steps">
+      <li><strong>Speech → Text:</strong> Web Speech API (Chrome/Edge) for live recording; audio files play back for live dictation; .txt/.vtt/.srt transcripts parsed locally.</li>
+      <li><strong>Text → Insight:</strong> local extractive summarisation in JavaScript — sentence scoring on action verbs, decisions, dates, numbers, speaker changes and keyword density. No API key, no network call, works offline.</li>
+      <li><strong>Text → Visual world:</strong> speaker-share bars, a colour-coded timeline, and a keyword cloud rendered from the same transcript — exportable as Markdown / plain text.</li>
+    </ol>
+    <p class="muted small">Privacy: audio and text never leave this page. The demo transcript is built in. Accuracy note: summarisation is extractive, so it quotes the meeting verbatim — it cannot invent a decision that was not said. See README.md for the measured demo results.</p>
+  </section>
+</main>
+
+<footer class="muted small">Meeting Insights Generator · StackUp November Coding Challenge · Theme: From Words to Worlds — Multimodal GenAI · Built with vanilla JS, HTML &amp; CSS · No dependencies, no backend.</footer>
+<script src="app.js"></script>
+</body>
+</html>
